@@ -10,7 +10,7 @@ import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Home.module.css'; // Corrected path
 
 const Home = () => {
-  const { coins, setCoins } = useCoinContext();
+  const { coins, addCoins } = useCoinContext(); // use addCoins method
   const [pops, setPops] = useState<{ id: number; x: number; y: number }[]>([]);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -20,7 +20,7 @@ const Home = () => {
     const id = Date.now();
 
     setPops((prev) => [...prev, { id, x, y }]);
-    setCoins((prev) => prev + 1);
+    addCoins(1); // use addCoins method
 
     setTimeout(() => {
       setPops((prev) => prev.filter((pop) => pop.id !== id));
