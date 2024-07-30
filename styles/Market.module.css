@@ -9,14 +9,13 @@
 }
 
 .main {
-  padding: 5rem 0;
+  padding: 2rem 0;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   position: relative;
-  width: 100%;
 }
 
 .title {
@@ -31,64 +30,75 @@
 }
 
 .marketBox {
-  width: 90%;
-  height: 60%;
-  margin-bottom: 5rem;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  width: 98%;
+  height: 60vh;
+  background: #f0f0f0;
+  overflow-y: scroll;
   padding: 1rem;
-  background-color: #f9f9f9;
-}
-
-.itemsContainer {
-  display: flex;
-  flex-direction: column;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+  align-items: flex-start;
 }
 
 .itemBlock {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #fff;
+  text-align: center;
+  box-sizing: border-box; /* Ensure padding and border are included in the width */
 }
 
 .itemImage {
-  width: 80%;
-  height: auto;
+  width: 100%;
+  max-width: 100px; /* Adjust image size */
   border-radius: 10px;
 }
 
 .itemName {
-  margin-top: 0.5rem;
-  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  font-size: 1rem; /* Adjust font size */
 }
 
 .itemPrice {
-  margin-top: 0.5rem;
-  font-size: 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.9rem; /* Adjust font size */
+}
+
+.coinIcon {
+  font-size: 1.2rem;
 }
 
 .upgradeButton {
   margin-top: 0.5rem;
   padding: 0.5rem 1rem;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #0070f3;
+  font-size: 0.9rem; /* Adjust font size */
+  color: white;
+  background: #0070f3;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background 0.3s ease;
 }
 
 .upgradeButton:disabled {
-  background-color: #ccc;
+  background: #ccc;
   cursor: not-allowed;
 }
 
+.upgradeButton:not(:disabled):hover {
+  background: #005bb5;
+}
+
+/* styles/globals.css */
+
+/* Navbar styles */
 .navbar {
   display: flex;
   justify-content: space-around;
@@ -98,14 +108,21 @@
   background: #fff;
   padding: 1rem 0;
   box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Ensure it stays above other content */
 }
 
+/* NavLink styles */
 .navLink {
   text-decoration: none;
-  color: #0070f3;
-  font-size: 1.2rem;
+  color: #fff;
+  background: #ffdd57;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .navLink:hover {
-  text-decoration: underline;
+  background: #ffd700;
+  color: #000;
 }
