@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useTelegramLogin } from 'react-telegram-login';
 import { useCoinContext } from '../context/CoinContext';
-import styles from '../styles/Login.module.css'; // Updated import path
+import styles from '../styles/Login.module.css';
 import Link from 'next/link';
 
 const Login = () => {
@@ -28,10 +28,10 @@ const Login = () => {
       const script = document.createElement('script');
       script.src = 'https://telegram.org/js/telegram-widget.js?7';
       script.async = true;
-      script.setAttribute('data-telegram-login', 'your_bot_username');
+      script.setAttribute('data-telegram-login', '@TMAClicker_bot');
       script.setAttribute('data-size', 'large');
       script.setAttribute('data-radius', '10');
-      script.setAttribute('data-auth-url', '/api/auth/telegram');
+      script.setAttribute('data-auth-url', 'https://js-clicker-tma.vercel.app/api/auth/telegram');
       script.setAttribute('data-request-access', 'write');
       script.setAttribute('data-userpic', 'false');
       document.getElementById('telegram-login-button')?.appendChild(script);
