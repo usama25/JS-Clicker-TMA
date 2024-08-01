@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useTelegramLogin } from 'react-telegram-login';
+import { TelegramLoginButton } from 'react-telegram-login';
 import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Login.module.css';
 import Link from 'next/link';
