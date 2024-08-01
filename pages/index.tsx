@@ -70,6 +70,7 @@ const Home = () => {
         <Link href="/" className={styles.navLink}>Home</Link>
         <Link href="/market" className={styles.navLink}>Market Place</Link>
         <Link href="/wallet" className={styles.navLink}>Wallet Connect</Link>
+        <Link href="/login" className={styles.navLink}>Login</Link>
       </nav>
     </div>
   );
