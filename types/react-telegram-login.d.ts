@@ -1,11 +1,15 @@
 declare module 'react-telegram-login' {
-    export interface TelegramLoginButtonProps {
+    import React from 'react';
+  
+    interface TelegramLoginButtonProps {
       botName: string;
       dataOnauth: (user: any) => void;
       onAuthError?: (error: any) => void;
       requestAccess?: string;
+      className?: string;
+      buttonSize?: string;
     }
   
-    export const TelegramLoginButton: React.FC<TelegramLoginButtonProps>;
+    export class TelegramLoginButton extends React.Component<TelegramLoginButtonProps> {}
   }
   

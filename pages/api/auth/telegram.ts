@@ -1,43 +1,30 @@
-// pages/api/auth/telegram.ts
-
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const BOT_TOKEN = '7227507147:AAGKUV9pQfYx_4V4pqLuI52t-UVwezOkl7s'; // Replace with your bot token
 
-if (!BOT_TOKEN) {
-  throw new Error('TELEGRAM_BOT_TOKEN is not defined in the environment variables.');
-}
-
-const validateTelegramAuth = (data: any) => {
-  const authData = { ...data };
-  const { hash, ...rest } = authData;
+const verifyTelegramLogin = (data: any): boolean => {
+  const authData = data;
+  const checkHash = authData.hash;
+  delete authData.hash;
   const secret = crypto.createHash('sha256').update(BOT_TOKEN).digest();
-
-  const checkString = Object.keys(rest)
+  const sortedData = Object.keys(authData)
     .sort()
-    .map((key) => `${key}=${rest[key]}`)
+    .map((key) => `${key}=${authData[key]}`)
     .join('\n');
-
-  const hmac = crypto.createHmac('sha256', secret).update(checkString).digest('hex');
-  return hmac === hash;
+  const hash = crypto.createHmac('sha256', secret).update(sortedData).digest('hex');
+  return hash === checkHash;
 };
 
-const handler = (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method !== 'POST') {
-    return res.status(405).end(); // Method Not Allowed
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') {
+    const isValid = verifyTelegramLogin(req.body);
+    if (isValid) {
+      res.status(200).json({ username: req.body.username });
+    } else {
+      res.status(403).json({ error: 'Invalid data' });
+    }
+  } else {
+    res.status(405).json({ error: 'Method not allowed' });
   }
-
-  const isValid = validateTelegramAuth(req.body);
-
-  if (!isValid) {
-    return res.status(403).json({ error: 'Forbidden' }); // Invalid Telegram authentication
-  }
-
-  // You can handle user login and token generation here
-  // For example, create a session or a JWT token and send it back to the client
-
-  res.status(200).json({ message: 'Authentication successful' });
-};
-
-export default handler;
+}
