@@ -1,5 +1,5 @@
 // pages/index.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,6 +12,14 @@ const Home = () => {
   const { coins, addCoins } = useCoinContext();
   const [pops, setPops] = useState<{ id: number; x: number; y: number }[]>([]);
   const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Retrieve username from localStorage
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -29,10 +37,12 @@ const Home = () => {
 
   const handleTelegramAuth = (user: any) => {
     setUsername(user.username);
+    localStorage.setItem('username', user.username);
   };
 
   const handleLogout = () => {
     setUsername(null);
+    localStorage.removeItem('username');
   };
 
   return (
