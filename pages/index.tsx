@@ -5,14 +5,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCoinContext } from '../context/CoinContext';
-import { useUserContext } from '../context/UserContext'; // Import UserContext
 import styles from '../styles/Home.module.css';
 import TelegramLogin from '../components/TelegramLogin';
 
 const Home = () => {
   const { coins, addCoins } = useCoinContext();
-  const { username, login, logout } = useUserContext(); // Use UserContext
   const [pops, setPops] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Retrieve username from localStorage
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -30,7 +37,13 @@ const Home = () => {
 
   const handleTelegramAuth = (user: any) => {
     const { username } = user;
-    login(username); // Use login function from UserContext
+    setUsername(username);
+    localStorage.setItem('username', username);
+  };
+
+  const handleLogout = () => {
+    setUsername(null);
+    localStorage.removeItem('username');
   };
 
   return (
@@ -48,7 +61,7 @@ const Home = () => {
           {username ? (
             <div>
               Welcome, {username}
-              <button onClick={logout} className={styles.logoutButton}>Logout</button>
+              <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
             </div>
           ) : (
             <>
