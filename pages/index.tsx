@@ -1,17 +1,17 @@
 // pages/index.tsx
-"use client";
-
 import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCoinContext } from '../context/CoinContext';
-import styles from '../styles/Home.module.css'; // Corrected path
+import styles from '../styles/Home.module.css';
+import TelegramLogin from '../components/TelegramLogin';
 
 const Home = () => {
-  const { coins, addCoins } = useCoinContext(); // use addCoins method
+  const { coins, addCoins } = useCoinContext();
   const [pops, setPops] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [username, setUsername] = useState<string | null>(null);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -20,11 +20,15 @@ const Home = () => {
     const id = Date.now();
 
     setPops((prev) => [...prev, { id, x, y }]);
-    addCoins(1); // use addCoins method
+    addCoins(1);
 
     setTimeout(() => {
       setPops((prev) => prev.filter((pop) => pop.id !== id));
     }, 2000);
+  };
+
+  const handleTelegramAuth = (user: any) => {
+    setUsername(user.username);
   };
 
   return (
@@ -38,6 +42,8 @@ const Home = () => {
       <main className={styles.main}>
         <h1 className={styles.title}>Clicker Mania</h1>
         <div className={styles.coinCount}>Coins: {coins}</div>
+        <div>{username ? `Welcome, ${username}` : 'Please log in via Telegram'}</div>
+        {!username && <TelegramLogin onAuth={handleTelegramAuth} />}
         <motion.div
           className={styles.imageContainer}
           onClick={handleImageClick}
@@ -45,7 +51,7 @@ const Home = () => {
           transition={{ type: 'spring', stiffness: 300 }}
         >
           <Image
-            src="/clicker.png" // Replace with your image path
+            src="/clicker.png"
             alt="Clicker Mania Image"
             width={200}
             height={200}
@@ -70,7 +76,6 @@ const Home = () => {
         <Link href="/" className={styles.navLink}>Home</Link>
         <Link href="/market" className={styles.navLink}>Market Place</Link>
         <Link href="/wallet" className={styles.navLink}>Wallet Connect</Link>
-        <Link href="/login" className={styles.navLink}>Login</Link>
       </nav>
     </div>
   );
