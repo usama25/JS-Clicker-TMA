@@ -36,8 +36,9 @@ const Home = () => {
   };
 
   const handleTelegramAuth = (user: any) => {
-    setUsername(user.username);
-    localStorage.setItem('username', user.username);
+    const { username } = user;
+    setUsername(username);
+    localStorage.setItem('username', username);
   };
 
   const handleLogout = () => {
