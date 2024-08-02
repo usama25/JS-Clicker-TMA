@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 
 const TelegramLogin: React.FC<{ onAuth: (user: any) => void }> = ({ onAuth }) => {
   useEffect(() => {
-    // Define the function globally to be called by the widget
     (window as any).onTelegramAuth = (user: any) => {
       onAuth(user);
     };

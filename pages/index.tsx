@@ -31,6 +31,10 @@ const Home = () => {
     setUsername(user.username);
   };
 
+  const handleLogout = () => {
+    setUsername(null);
+  };
+
   return (
     <div className={styles.container}>
       <Head>
@@ -42,8 +46,19 @@ const Home = () => {
       <main className={styles.main}>
         <h1 className={styles.title}>Clicker Mania</h1>
         <div className={styles.coinCount}>Coins: {coins}</div>
-        <div>{username ? `Welcome, ${username}` : 'Please log in via Telegram'}</div>
-        {!username && <TelegramLogin onAuth={handleTelegramAuth} />}
+        <div>
+          {username ? (
+            <div>
+              Welcome, {username}
+              <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
+            </div>
+          ) : (
+            <>
+              <div>Please log in via Telegram</div>
+              <TelegramLogin onAuth={handleTelegramAuth} />
+            </>
+          )}
+        </div>
         <motion.div
           className={styles.imageContainer}
           onClick={handleImageClick}
