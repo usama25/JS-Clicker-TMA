@@ -42,7 +42,13 @@ const Home = () => {
       <main className={styles.main}>
         <h1 className={styles.title}>Clicker Mania</h1>
         <div className={styles.coinCount}>Coins: {coins}</div>
-        <div>{username ? `Welcome, ${username}` : 'Please log in via Telegram'}</div>
+        <div>
+          {username ? (
+            <div>Welcome, {username}</div>
+          ) : (
+            'Please log in via Telegram'
+          )}
+        </div>
         {!username && <TelegramLogin onAuth={handleTelegramAuth} />}
         <motion.div
           className={styles.imageContainer}
