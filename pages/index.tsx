@@ -5,11 +5,22 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Home.module.css';
+import axios from 'axios';
 
 const Home = () => {
   const { coins, addCoins } = useCoinContext();
   const [pops, setPops] = useState<{ id: number; x: number; y: number }[]>([]);
-  const [username, setUsername] = useState<string | null>(null);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    axios.get('/api/get-username')
+      .then(response => {
+        setUsername(response.data.username);
+      })
+      .catch(error => {
+        console.error('Error fetching username:', error);
+      });
+  }, []);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -25,18 +36,6 @@ const Home = () => {
     }, 2000);
   };
 
-  useEffect(() => {
-    // Fetch username from your API
-    fetch('/api/webhook')
-      .then(response => response.json())
-      .then(data => {
-        if (data.username) {
-          setUsername(data.username);
-        }
-      })
-      .catch(error => console.error('Error fetching username:', error));
-  }, []);
-
   return (
     <div className={styles.container}>
       <Head>
@@ -47,7 +46,7 @@ const Home = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Clicker Mania</h1>
-        {username && <div className={styles.username}>Welcome, @{username}!</div>}
+        <h2 className={styles.username}>Welcome, {username}</h2>
         <div className={styles.coinCount}>Coins: {coins}</div>
         <motion.div
           className={styles.imageContainer}
