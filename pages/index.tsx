@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Home.module.css';
-import TelegramLogin from '../components/TelegramLogin';
 
 const Home = () => {
   const { coins, addCoins } = useCoinContext();
@@ -14,11 +13,13 @@ const Home = () => {
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    // Retrieve username from localStorage
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
+    const fetchUsername = async () => {
+      const response = await fetch('/api/username');
+      const data = await response.json();
+      setUsername(data.username);
+    };
+
+    fetchUsername();
   }, []);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -35,17 +36,6 @@ const Home = () => {
     }, 2000);
   };
 
-  const handleTelegramAuth = (user: any) => {
-    const { username } = user;
-    setUsername(username);
-    localStorage.setItem('username', username);
-  };
-
-  const handleLogout = () => {
-    setUsername(null);
-    localStorage.removeItem('username');
-  };
-
   return (
     <div className={styles.container}>
       <Head>
@@ -55,21 +45,10 @@ const Home = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>Clicker Mania</h1>
+        <h1 className={styles.title}>
+          Clicker Mania {username && <span> - {username}</span>}
+        </h1>
         <div className={styles.coinCount}>Coins: {coins}</div>
-        <div>
-          {username ? (
-            <div>
-              Welcome, {username}
-              <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
-            </div>
-          ) : (
-            <>
-              <div>Please log in via Telegram</div>
-              <TelegramLogin onAuth={handleTelegramAuth} />
-            </>
-          )}
-        </div>
         <motion.div
           className={styles.imageContainer}
           onClick={handleImageClick}
