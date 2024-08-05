@@ -1,25 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Home.module.css';
-import axios from 'axios';
+
 
 const Home = () => {
   const { coins, addCoins } = useCoinContext();
   const [pops, setPops] = useState<{ id: number; x: number; y: number }[]>([]);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get('/api/get-username')
-      .then(response => {
-        setUsername(response.data.username);
-      })
-      .catch(error => {
-        console.error('Error fetching username:', error);
-      });
+    // Simulate fetching the username
+    const fetchUsername = async () => {
+      const response = await fetch('/api/telegram');
+      const data = await response.json();
+      setUsername(data.username);
+    };
+
+    fetchUsername();
   }, []);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -46,7 +47,7 @@ const Home = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Clicker Mania</h1>
-        <h2 className={styles.username}>Welcome, {username}</h2>
+        {username ? <p>Your username is: {username}</p> : <p>Loading...</p>}
         <div className={styles.coinCount}>Coins: {coins}</div>
         <motion.div
           className={styles.imageContainer}
