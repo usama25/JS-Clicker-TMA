@@ -4,7 +4,6 @@ let username = '';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log(`Received request method: ${req.method}`);
-
   if (req.method === 'POST') {
     const { message } = req.body;
     username = message?.from?.username || '';
@@ -13,6 +12,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     res.status(200).json({ message: 'Username received' });
   } else if (req.method === 'GET') {
+    console.log(`GET request received, sending username: ${username}`);
     res.status(200).json({ username });
   } else {
     res.setHeader('Allow', ['POST', 'GET']);

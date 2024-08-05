@@ -1,4 +1,3 @@
-// pages/index.tsx
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -11,16 +10,6 @@ const Home = () => {
   const { coins, addCoins } = useCoinContext();
   const [pops, setPops] = useState<{ id: number; x: number; y: number }[]>([]);
   const [username, setUsername] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUsername = async () => {
-      const response = await fetch('/api/username');
-      const data = await response.json();
-      setUsername(data.username);
-    };
-
-    fetchUsername();
-  }, []);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -36,6 +25,18 @@ const Home = () => {
     }, 2000);
   };
 
+  useEffect(() => {
+    // Fetch username from your API
+    fetch('/api/webhook')
+      .then(response => response.json())
+      .then(data => {
+        if (data.username) {
+          setUsername(data.username);
+        }
+      })
+      .catch(error => console.error('Error fetching username:', error));
+  }, []);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -45,9 +46,8 @@ const Home = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Clicker Mania {username && <span> - {username}</span>}
-        </h1>
+        <h1 className={styles.title}>Clicker Mania</h1>
+        {username && <div className={styles.username}>Welcome, @{username}!</div>}
         <div className={styles.coinCount}>Coins: {coins}</div>
         <motion.div
           className={styles.imageContainer}
