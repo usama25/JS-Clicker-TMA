@@ -2,9 +2,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || 'YOUR_TELEGRAM_BOT_TOKEN';
-
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || '7227507147:AAGKUV9pQfYx_4V4pqLuI52t-UVwezOkl7s';
 const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_TOKEN}`;
+
+let latestUsername: string | null = null;
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
@@ -13,6 +14,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (message && message.text) {
       const chatId = message.chat.id;
       const username = message.from.username || 'Unknown';
+      latestUsername = username;
 
       // Reply with the username
       await fetch(`${TELEGRAM_API}/sendMessage`, {
@@ -30,6 +32,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     } else {
       res.status(200).json({ status: 'ignored' });
     }
+  } else if (req.method === 'GET') {
+    res.status(200).json({ username: latestUsername });
   } else {
     res.status(405).json({ status: 'method not allowed' });
   }
