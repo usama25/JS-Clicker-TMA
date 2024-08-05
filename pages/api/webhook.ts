@@ -1,11 +1,16 @@
-// pages/api/username.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 let username = '';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log(`Received request method: ${req.method}`);
+
   if (req.method === 'POST') {
-    username = req.body.username;
+    const { message } = req.body;
+    username = message?.from?.username || '';
+
+    console.log(`Received message from @${username}`);
+
     res.status(200).json({ message: 'Username received' });
   } else if (req.method === 'GET') {
     res.status(200).json({ username });
