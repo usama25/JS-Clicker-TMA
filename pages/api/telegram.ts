@@ -24,7 +24,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         },
         body: JSON.stringify({
           chat_id: chatId,
-          text: `Your username is: ${username}`,
+          text: ``,
         }),
       });
 
