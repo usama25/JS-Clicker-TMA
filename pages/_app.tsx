@@ -4,7 +4,7 @@ import { CoinProvider } from '../context/CoinContext';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import '../styles/globals.css';
 
-const manifestUrl = 'https://usama25.github.io/Clicker-Telegram/tonconnect-manifest.json'; // Replace with your manifest URL
+const manifestUrl = 'https://js-clicker-tma.vercel.app/tonconnect-manifest.json'; // Replace with your manifest URL
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
