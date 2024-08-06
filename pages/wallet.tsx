@@ -3,16 +3,30 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useCoinContext } from '../context/CoinContext';
-import { TonConnectButton } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import styles from '../styles/Home.module.css';
 
 const Wallet = () => {
   const { coins } = useCoinContext();
-  const [isConnected, setIsConnected] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
+  const { account, connected, connect } = useTonConnectUI();
 
   useEffect(() => {
-    // Here you would add logic to handle TonConnect state
-  }, []);
+    if (connected && account) {
+      const walletAddress = account.address;
+
+      fetch(`/api/wallet-balance?address=${walletAddress}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.balance) {
+            setBalance(data.balance);
+          } else {
+            console.error(data.error);
+          }
+        })
+        .catch(error => console.error('Error fetching wallet balance:', error));
+    }
+  }, [connected, account]);
 
   return (
     <div className={styles.container}>
@@ -24,8 +38,13 @@ const Wallet = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Wallet Connect</h1>
-       
         <TonConnectButton />
+        {connected && account && (
+          <div>
+            <h2>Wallet Address: {account.address}</h2>
+            <h2>Balance: {balance !== null ? `${balance} TON` : 'Loading...'}</h2>
+          </div>
+        )}
       </main>
 
       <nav className={styles.navbar}>
