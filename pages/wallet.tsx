@@ -2,31 +2,47 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useCoinContext } from '../context/CoinContext';
-import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import styles from '../styles/Home.module.css';
 
 const Wallet = () => {
-  const { coins } = useCoinContext();
-  const [balance, setBalance] = useState<number | null>(null);
-  const { account, connected, connect } = useTonConnectUI();
+  const [balance, setBalance] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string>('');
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (connected && account) {
-      const walletAddress = account.address;
-
-      fetch(`/api/wallet-balance?address=${walletAddress}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.balance) {
-            setBalance(data.balance);
-          } else {
-            console.error(data.error);
-          }
-        })
-        .catch(error => console.error('Error fetching wallet balance:', error));
+  const fetchWalletBalance = async (address: string) => {
+    setIsFetching(true);
+    try {
+      const response = await fetch('/api/wallet-balance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address }),
+      });
+      const data = await response.json();
+      if (data.balance) {
+        setBalance(data.balance);
+      } else {
+        console.error(data.error);
+        setBalance('Error fetching balance');
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+      setBalance('Error fetching balance');
+    } finally {
+      setIsFetching(false);
     }
-  }, [connected, account]);
+  };
+
+  const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setWalletAddress(event.target.value);
+  };
+
+  const handleFetchBalance = () => {
+    if (walletAddress) {
+      fetchWalletBalance(walletAddress);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -38,11 +54,21 @@ const Wallet = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Wallet Connect</h1>
-        <TonConnectButton />
-        {connected && account && (
-          <div>
-            <h2>Wallet Address: {account.address}</h2>
-            <h2>Balance: {balance !== null ? `${balance} TON` : 'Loading...'}</h2>
+        <div className={styles.walletForm}>
+          <input
+            type="text"
+            value={walletAddress}
+            onChange={handleAddressChange}
+            placeholder="Enter Wallet Address"
+            className={styles.input}
+          />
+          <button onClick={handleFetchBalance} className={styles.button} disabled={isFetching}>
+            {isFetching ? 'Fetching...' : 'Get Balance'}
+          </button>
+        </div>
+        {balance !== null && (
+          <div className={styles.balance}>
+            <h2>Wallet Balance: {balance} TON</h2>
           </div>
         )}
       </main>
