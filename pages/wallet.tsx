@@ -1,18 +1,46 @@
-// pages/wallet.tsx
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import axios from 'axios';
 import { useCoinContext } from '../context/CoinContext';
-import { TonConnectButton } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import styles from '../styles/Home.module.css';
 
 const Wallet = () => {
   const { coins } = useCoinContext();
-  const [isConnected, setIsConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string | null>(null);
+
+  const [tonConnectUI, setTonConnectUI] = useTonConnectUI();
 
   useEffect(() => {
-    // Here you would add logic to handle TonConnect state
-  }, []);
+    if (tonConnectUI) {
+      const handleStatusChange = (status: any) => {
+        if (status.walletsList && status.walletsList[0]) {
+          const address = status.walletsList[0].address;
+          setWalletAddress(address);
+          fetchBalance(address);
+        }
+      };
+
+      tonConnectUI.onStatusChange(handleStatusChange);
+
+      // Cleanup function to reset tonConnectUI
+      return () => {
+        // No offStatusChange method; instead, reset tonConnectUI if necessary
+        setTonConnectUI(null as any);
+      };
+    }
+  }, [tonConnectUI, setTonConnectUI]);
+
+  const fetchBalance = async (address: string) => {
+    try {
+      const response = await axios.post('/api/balance', { address });
+      setBalance(response.data.balance);
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -24,8 +52,14 @@ const Wallet = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Wallet Connect</h1>
-       
         <TonConnectButton />
+
+        {walletAddress && (
+          <div>
+            <p>Wallet Address: {walletAddress}</p>
+            <p>Balance: {balance !== null ? `${balance} TON` : 'Loading...'}</p>
+          </div>
+        )}
       </main>
 
       <nav className={styles.navbar}>
