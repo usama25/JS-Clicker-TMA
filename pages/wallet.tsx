@@ -27,7 +27,6 @@ const Wallet = () => {
 
       // Cleanup function to reset tonConnectUI
       return () => {
-        // No offStatusChange method; instead, reset tonConnectUI if necessary
         setTonConnectUI(null as any);
       };
     }
