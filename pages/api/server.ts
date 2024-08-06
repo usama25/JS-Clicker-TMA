@@ -1,89 +1,34 @@
-import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
-import axios from 'axios';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { TonClient, Address, fromNano } from '@ton/ton';
 
-const app = express();
-app.use(bodyParser.json());
+const client = new TonClient({ endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC' });
 
-// Replace with your Telegram bot token
-const TELEGRAM_BOT_TOKEN = '7227507147:AAGKUV9pQfYx_4V4pqLuI52t-UVwezOkl7s'; 
-// Replace with your actual server URL
-const WEBHOOK_URL = 'https://js-clicker-tma.vercel.app/api/telegram-webhook';
-
-// Function to set up the webhook
-const setWebhook = async () => {
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`;
+const getWalletBalance = async (address: string) => {
   try {
-    const response = await axios.post(url, { url: WEBHOOK_URL });
-    console.log('Webhook set:', response.data);
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      // Handle Axios-specific errors
-      console.error('Axios error setting webhook:', error.response ? error.response.data : error.message);
-    } else if (error instanceof Error) {
-      // Handle other errors
-      console.error('Error setting webhook:', error.message);
-    } else {
-      // Handle unexpected error types
-      console.error('Unexpected error setting webhook:', error);
-    }
+    const addressObj = Address.parse(address); // Convert string to Address type
+    const balance = await client.getBalance(addressObj);
+    return fromNano(balance);
+  } catch (error) {
+    console.error('Error fetching balance:', error);
+    throw new Error('Error fetching balance');
   }
 };
 
-// Call setWebhook when the server starts
-setWebhook();
-
-// Endpoint to handle incoming updates from Telegram
-app.post('/api/telegram-webhook', (req: Request, res: Response) => {
-  const update = req.body;
-  console.log('Received update:', update);
-
-  // Process the update
-  if (update.message) {
-    const chatId = update.message.chat.id;
-    const text = update.message.text;
-
-    // Handle different types of messages
-    if (text === '/balance') {
-      // Example response for balance
-      sendMessage(chatId, 'Your balance is 1000 TON.');
-    } else if (text.startsWith('/send')) {
-      // Example handling of send command
-      const [, from, to, amount] = text.split(' ');
-      sendMessage(chatId, `Transaction from ${from} to ${to} of amount ${amount} processed.`);
-    } else {
-      sendMessage(chatId, 'Unknown command.');
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'POST') {
+    const { address } = req.body;
+    if (!address) {
+      return res.status(400).json({ error: 'Address is required' });
     }
-  }
 
-  // Respond to Telegram
-  res.sendStatus(200);
-});
-
-// Function to send a message to a chat
-const sendMessage = async (chatId: number, message: string) => {
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  try {
-    const response = await axios.post(url, {
-      chat_id: chatId,
-      text: message,
-    });
-    console.log('Message sent:', response.data);
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      // Handle Axios-specific errors
-      console.error('Axios error sending message:', error.response ? error.response.data : error.message);
-    } else if (error instanceof Error) {
-      // Handle other errors
-      console.error('Error sending message:', error.message);
-    } else {
-      // Handle unexpected error types
-      console.error('Unexpected error sending message:', error);
+    try {
+      const balance = await getWalletBalance(address);
+      res.status(200).json({ balance });
+    } catch (error) {
+      res.status(500).json({ error: 'Error performing wallet operation' });
     }
+  } else {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-};
-
-const port = process.env.PORT || 3001;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+}

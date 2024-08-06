@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^14.0.0",
     "@tonconnect/ui-react": "^2.0.6",
     "axios": "^1.7.3",
     "body-parser": "^1.20.2",
