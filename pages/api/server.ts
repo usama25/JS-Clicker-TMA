@@ -1,9 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { TonClient, WalletContractV4, fromNano } from '@ton/ton';
+import { TonClient, WalletContractV4, fromNano, Address } from '@ton/ton';
 import { getHttpEndpoint } from '@orbs-network/ton-access';
-import { Buffer } from 'buffer';
-
-const TON_CLIENT_ENDPOINT = 'https://testnet.toncenter.com/api/v2/jsonRPC'; // Update with your endpoint if needed
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -14,24 +11,41 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(400).json({ error: 'Address is required' });
       }
 
-      // Convert the address to a Buffer
-      const publicKey = Buffer.from(address, 'hex'); // Assuming address is in hexadecimal format
-
       // Initialize the TonClient
       const endpoint = await getHttpEndpoint({ network: 'testnet' });
-      const client = new TonClient({ endpoint: endpoint || TON_CLIENT_ENDPOINT });
+      const client = new TonClient({ endpoint });
+
+      // Convert the address string to Address type
+      const walletAddress = Address.parse(address);
 
       // Open wallet and get balance
-      const wallet = WalletContractV4.create({ publicKey, workchain: 0 });
-      const balance = await client.getBalance(wallet.address);
+      const wallet = WalletContractV4.create({ publicKey: walletAddress.hash as unknown as Buffer, workchain: 0 });
 
-      return res.status(200).json({ balance: fromNano(balance) });
+      try {
+        const balance = await client.getBalance(wallet.address);
+        console.log('Balance fetched successfully:', balance);
+        return res.status(200).json({ balance: fromNano(balance) });
+      } catch (innerError) {
+        if (innerError instanceof Error) {
+          console.error('Error fetching balance:', innerError.message);
+          return res.status(500).json({ error: 'Error fetching balance', details: innerError.message });
+        } else {
+          console.error('Unknown error fetching balance');
+          return res.status(500).json({ error: 'Unknown error fetching balance' });
+        }
+      }
+
     } else {
       return res.status(405).json({ error: 'Method not allowed' });
     }
   } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+      return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    } else {
+      console.error('Unknown error');
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 };
 

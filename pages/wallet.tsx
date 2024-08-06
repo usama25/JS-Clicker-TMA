@@ -1,81 +1,66 @@
 import { useState, useEffect } from 'react';
-import { TonConnectButton, useTonAddress, useTonWallet } from '@tonconnect/ui-react';
+import Head from 'next/head';
+import Link from 'next/link';
+import axios from 'axios';
+import { useTonWallet, useTonAddress, TonConnectButton } from '@tonconnect/ui-react';
+import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Home.module.css';
 
-// Function to fetch balance from the server
-const fetchBalance = async (address: string) => {
-  try {
-    const response = await fetch('/api/wallet-operation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ address }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Error fetching balance');
-    }
-
-    const data = await response.json();
-    return data.balance;
-  } catch (error) {
-    throw new Error('Error fetching balance');
-  }
-};
-
 const Wallet = () => {
-  const wallet = useTonWallet();
-  const address = useTonAddress();
+  const { coins } = useCoinContext();
+  const [isConnected, setIsConnected] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const wallet = useTonWallet();
+  const userFriendlyAddress = useTonAddress();
 
   useEffect(() => {
-    if (address) {
-      handleCheckBalance();
-    }
-  }, [address]);
+    if (wallet) {
+      setIsConnected(true);
+      // Fetch the balance once the wallet is connected
+      const fetchBalance = async () => {
+        try {
+          const response = await axios.post('/api/ton', { address: userFriendlyAddress });
+          setBalance(response.data.balance);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error('Error fetching balance:', error.message);
+            setBalance('Error fetching balance');
+          } else {
+            console.error('Unknown error fetching balance');
+            setBalance('Unknown error fetching balance');
+          }
+        }
+      };
 
-  const handleCheckBalance = async () => {
-    if (!address) {
-      setError('No address available');
-      return;
+      fetchBalance();
     }
-
-    try {
-      const balance = await fetchBalance(address);
-      setBalance(balance);
-      setError(null);
-    } catch (error) {
-      setError((error as Error).message);
-    }
-  };
+  }, [wallet, userFriendlyAddress]);
 
   return (
     <div className={styles.container}>
-      <h1>Wallet Connect & Balance</h1>
+      <Head>
+        <title>Wallet Connect</title>
+        <meta name="description" content="Wallet Connect page" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-      <div className={styles.walletConnect}>
+      <main className={styles.main}>
+        <h1 className={styles.title}>Wallet Connect</h1>
         <TonConnectButton />
-      </div>
+        {isConnected && wallet && (
+          <div>
+            <p>Connected Wallet: {(wallet as any).name ?? 'Unknown'}</p>
+            <p>Address: {userFriendlyAddress}</p>
+            <p>Balance: {balance}</p>
+          </div>
+        )}
+      </main>
 
-      {wallet && (
-        <div>
-          {/* Displaying wallet details if available */}
-          <p>Wallet Info:</p>
-          <pre>{JSON.stringify(wallet, null, 2)}</pre>
-        </div>
-      )}
-
-      {address && (
-        <div>
-          <p>User-friendly Address: {address}</p>
-          <button onClick={handleCheckBalance}>Check Balance</button>
-        </div>
-      )}
-
-      {balance && <p>Balance: {balance} TON</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      <nav className={styles.navbar}>
+        <Link href="/" className={styles.navLink}>Home</Link>
+        <Link href="/market" className={styles.navLink}>Market Place</Link>
+        <Link href="/wallet" className={styles.navLink}>Wallet Connect</Link>
+      </nav>
     </div>
   );
 };
