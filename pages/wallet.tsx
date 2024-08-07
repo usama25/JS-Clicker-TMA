@@ -3,12 +3,12 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useTonAddress, TonConnectButton } from '@tonconnect/ui-react';
 import axios from 'axios';
-import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Home.module.css'; // Ensure this path is correct
 
 const Wallet = () => {
   const address = useTonAddress();
   const [balance, setBalance] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (address) {
@@ -20,6 +20,7 @@ const Wallet = () => {
         })
         .catch(error => {
           console.error('Error sending address:', error);
+          setError('Failed to fetch balance');
         });
     }
   }, [address]);
@@ -37,7 +38,8 @@ const Wallet = () => {
 
         <TonConnectButton />
         {address && <p>Connected Wallet Address: {address}</p>}
-        {balance !== null && <p>Wallet Balance: {balance}</p>}
+        {balance !== null ? <p>Wallet Balance: {balance}</p> : <p>Fetching balance...</p>}
+        {error && <p className={styles.error}>{error}</p>}
       </main>
 
       <nav className={styles.navbar}>
