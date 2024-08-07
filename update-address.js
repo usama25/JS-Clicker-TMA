@@ -25,7 +25,7 @@ app.post('/api/send-address', async (req, res) => {
     });
     console.log('API Response:', response.data);
 
-    const balance = response.data.balance; // Adjust based on the service's response format
+    const balance = response.data.result.balance; // Adjust based on the service's response format
 
     res.status(200).json({ balance });
   } catch (error) {
