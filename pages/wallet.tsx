@@ -4,9 +4,11 @@ import Head from 'next/head';
 import { useTonAddress, TonConnectButton } from '@tonconnect/ui-react';
 import axios from 'axios';
 import { useCoinContext } from '../context/CoinContext';
-import styles from '../styles/Home.module.css'; 
+import styles from '../styles/Home.module.css'; // Ensure this path is correct
+
 const Wallet = () => {
   const address = useTonAddress();
+  const [balance, setBalance] = useState<string | null>(null);
 
   useEffect(() => {
     if (address) {
@@ -14,6 +16,7 @@ const Wallet = () => {
       axios.post('/api/send-address', { address })
         .then(response => {
           console.log('Address sent successfully');
+          setBalance(response.data.balance);
         })
         .catch(error => {
           console.error('Error sending address:', error);
@@ -22,7 +25,6 @@ const Wallet = () => {
   }, [address]);
 
   return (
-    
     <div className={styles.container}>
       <Head>
         <title>Wallet Connect</title>
@@ -31,14 +33,13 @@ const Wallet = () => {
       </Head>
 
       <main className={styles.main}>
-      <h1 className={styles.title}>Wallet Connect</h1>
+        <h1 className={styles.title}>Wallet Connect</h1>
 
-      <TonConnectButton />
-      {address && <p>Connected Wallet Address: {address}</p>}
-      
+        <TonConnectButton />
+        {address && <p>Connected Wallet Address: {address}</p>}
+        {balance !== null && <p>Wallet Balance: {balance}</p>}
       </main>
 
-      
       <nav className={styles.navbar}>
         <Link href="/" className={styles.navLink}>Home</Link>
         <Link href="/market" className={styles.navLink}>Market Place</Link>
