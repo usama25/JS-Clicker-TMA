@@ -19,6 +19,7 @@
     "framer-motion": "^11.3.17",
     "next": "14.2.5",
     "node-fetch": "^3.3.2",
+    "node-telegram-bot-api": "^0.66.0",
     "react": "^18",
     "react-dom": "^18",
     "react-telegram-login": "^1.1.2",
