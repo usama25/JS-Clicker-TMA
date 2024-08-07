@@ -1,3 +1,4 @@
+// /server/bot-server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
@@ -21,7 +22,6 @@ app.post('/update-address', async (req, res) => {
     const balance = response.data.balance; // Adjust based on the service's response format
 
     // Send the balance to the user via Telegram bot
-    // You need to store the user chat ID from when the user interacted with the bot initially
     const chatId = 'USER_CHAT_ID'; // Replace with actual user chat ID
     await bot.sendMessage(chatId, `Wallet Address: ${address}\nBalance: ${balance}`);
 
