@@ -1,4 +1,3 @@
-// /server/bot-server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
@@ -6,7 +5,7 @@ const axios = require('axios');
 const app = express();
 app.use(bodyParser.json());
 
-const TON_API_URL = 'https://testnet.toncenter.com/api/v2/getAddressBalance'; // Adjust based on the service you use
+const TON_API_URL = 'https://testnet.toncenter.com/api/v2/getAddressBalance';
 
 app.post('/api/send-address', async (req, res) => {
   const { address } = req.body;
@@ -19,7 +18,11 @@ app.post('/api/send-address', async (req, res) => {
 
   try {
     // Fetch the balance from the TON blockchain service
-    const response = await axios.get(`${TON_API_URL}?address=${address}`);
+    const response = await axios.get(TON_API_URL, {
+      params: {
+        address: address
+      }
+    });
     console.log('API Response:', response.data);
 
     const balance = response.data.balance; // Adjust based on the service's response format
