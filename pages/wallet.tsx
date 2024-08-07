@@ -1,40 +1,44 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import axios from 'axios';
-import { useTonWallet, useTonAddress, TonConnectButton } from '@tonconnect/ui-react';
+import { TonClient, WalletContractV4 } from "@ton/ton";
+import { useTonAddress, TonConnectButton } from '@tonconnect/ui-react';
 import { useCoinContext } from '../context/CoinContext';
 import styles from '../styles/Home.module.css';
+import { Buffer } from 'buffer';
+
+if (typeof window !== 'undefined') {
+  window.Buffer = Buffer;
+}
 
 const Wallet = () => {
   const { coins } = useCoinContext();
   const [isConnected, setIsConnected] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
-  const wallet = useTonWallet();
-  const userFriendlyAddress = useTonAddress();
+  const address = useTonAddress();
 
   useEffect(() => {
-    if (wallet) {
-      setIsConnected(true);
-      // Fetch the balance once the wallet is connected
-      const fetchBalance = async () => {
+    const fetchWalletBalance = async () => {
+      if (address) {
         try {
-          const response = await axios.post('/api/ton', { address: userFriendlyAddress });
-          setBalance(response.data.balance);
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            console.error('Error fetching balance:', error.message);
-            setBalance('Error fetching balance');
-          } else {
-            console.error('Unknown error fetching balance');
-            setBalance('Unknown error fetching balance');
-          }
-        }
-      };
+          const client = new TonClient({
+            endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+          });
 
-      fetchBalance();
-    }
-  }, [wallet, userFriendlyAddress]);
+          const wallet = WalletContractV4.create({ workchain: 0, publicKey: Buffer.from(address, 'hex') });
+          const contract = client.open(wallet);
+          const walletBalance = await contract.getBalance();
+          const balanceInTON = (walletBalance / BigInt(1e9)).toString(); // Convert nanoTONs to TON
+          setBalance(balanceInTON);
+        } catch (error) {
+          console.error('Error fetching balance:', error);
+        }
+      }
+    };
+
+    fetchWalletBalance();
+    setIsConnected(!!address);
+  }, [address]);
 
   return (
     <div className={styles.container}>
@@ -47,11 +51,10 @@ const Wallet = () => {
       <main className={styles.main}>
         <h1 className={styles.title}>Wallet Connect</h1>
         <TonConnectButton />
-        {isConnected && wallet && (
+        {isConnected && (
           <div>
-            <p>Connected Wallet: {(wallet as any).name ?? 'Unknown'}</p>
-            <p>Address: {userFriendlyAddress}</p>
-            <p>Balance: {balance}</p>
+            <h2>Wallet Address: {address}</h2>
+            <h3>Balance: {balance ? balance : 'Loading...'}</h3>
           </div>
         )}
       </main>
