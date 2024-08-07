@@ -17,19 +17,21 @@ app.post('/api/send-address', async (req, res) => {
   }
 
   try {
+    const url = `${TON_API_URL}?address=${address}`;
+    console.log(`Fetching balance from URL: ${url}`);
+
     // Fetch the balance from the TON blockchain service
-    const response = await axios.get(TON_API_URL, {
-      params: {
-        address: address
-      }
-    });
+    const response = await axios.get(url);
     console.log('API Response:', response.data);
 
-    const balance = response.data.result.balance; // Adjust based on the service's response format
-
-    res.status(200).json({ balance });
+    if (response.data.ok) {
+      const balance = response.data.result.balance;
+      res.status(200).json({ balance });
+    } else {
+      throw new Error(`API Error: ${response.data.error}`);
+    }
   } catch (error) {
-    console.error('Error fetching balance:', error);
+    console.error('Error fetching balance:', error.message);
     res.status(500).json({ message: 'Error fetching balance', error: error.message });
   }
 });

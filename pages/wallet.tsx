@@ -16,6 +16,7 @@ const Wallet = () => {
       axios.post('/api/send-address', { address })
         .then(response => {
           console.log('Address sent successfully');
+          console.log('Balance:', response.data.balance);
           setBalance(response.data.balance);
         })
         .catch(error => {
