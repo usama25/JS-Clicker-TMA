@@ -1,29 +1,43 @@
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Head from 'next/head';
+import Link from 'next/link';
+import { TonClient, WalletContractV4 } from "@ton/ton";
 import { useTonAddress, TonConnectButton } from '@tonconnect/ui-react';
-import axios from 'axios';
-import styles from '../styles/Home.module.css'; // Ensure this path is correct
+import { useCoinContext } from '../context/CoinContext';
+import styles from '../styles/Home.module.css';
+import { Buffer } from 'buffer';
+
+if (typeof window !== 'undefined') {
+  window.Buffer = Buffer;
+}
 
 const Wallet = () => {
-  const address = useTonAddress();
+  const { coins } = useCoinContext();
+  const [isConnected, setIsConnected] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const address = useTonAddress();
 
   useEffect(() => {
-    if (address) {
-      // Send the wallet address to your server
-      axios.post('/api/send-address', { address })
-        .then(response => {
-          console.log('Address sent successfully');
-          console.log('Balance:', response.data.balance);
-          setBalance(response.data.balance);
-        })
-        .catch(error => {
-          console.error('Error sending address:', error);
-          setError('Failed to fetch balance');
-        });
-    }
+    const fetchWalletBalance = async () => {
+      if (address) {
+        try {
+          const client = new TonClient({
+            endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+          });
+
+          const wallet = WalletContractV4.create({ workchain: 0, publicKey: Buffer.from(address, 'hex') });
+          const contract = client.open(wallet);
+          const walletBalance = await contract.getBalance();
+          const balanceInTON = (walletBalance / BigInt(1e9)).toString(); // Convert nanoTONs to TON
+          setBalance(balanceInTON);
+        } catch (error) {
+          console.error('Error fetching balance:', error);
+        }
+      }
+    };
+
+    fetchWalletBalance();
+    setIsConnected(!!address);
   }, [address]);
 
   return (
@@ -36,11 +50,13 @@ const Wallet = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Wallet Connect</h1>
-
         <TonConnectButton />
-        {address && <p>Connected Wallet Address: {address}</p>}
-        {balance !== null ? <p>Wallet Balance: {balance}</p> : <p>Fetching balance...</p>}
-        {error && <p className={styles.error}>{error}</p>}
+        {isConnected && (
+          <div>
+            <h2>Wallet Address: {address}</h2>
+            <h3>Balance: {balance ? balance : 'Loading...'}</h3>
+          </div>
+        )}
       </main>
 
       <nav className={styles.navbar}>
